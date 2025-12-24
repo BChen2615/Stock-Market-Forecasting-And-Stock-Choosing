@@ -1,2 +1,4 @@
 # Following is the line to ignore the OS hidden file
 *.DS_Store
+.idea/
+TDD.qmd
