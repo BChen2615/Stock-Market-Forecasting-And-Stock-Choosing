@@ -1,0 +1,20 @@
+---
+title: "Stock Forecasting Engine: Technical Design"
+author: "Branden Chen"
+date: last-modified
+format:
+  html:
+    theme: cosmo               # "cosmo", "flatly", or "journal" look best for tech
+    toc: true                  # Table of Contents
+    toc-location: left         # Puts TOC on the side
+    toc-depth: 3
+    number-sections: true      # Adds 1.1, 1.2 numbers to headers
+    code-fold: true            # Hides code by default (users click to see it)
+    code-tools: true           # Adds a "Source Code" menu at top right
+    smooth-scroll: true
+    highlight-style: github    # Classic code coloring
+    self-contained: true       # Makes one single HTML file (easy to share)
+execute:
+  warning: false               # Hides messy Python/R warnings
+  message: false
+---
