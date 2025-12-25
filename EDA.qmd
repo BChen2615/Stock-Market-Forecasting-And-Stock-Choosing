@@ -1,0 +1,9 @@
+---
+title: "Taiwan Stock Market Exploratory Data Analysis"
+author: "Branden Chen"
+date: last-modified
+format: 
+  dashboard:
+    theme: cosmo
+    nav-buttons: [github]
+---
