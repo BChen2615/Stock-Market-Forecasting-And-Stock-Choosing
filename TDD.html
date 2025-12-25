@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Branden Chen">
-<meta name="dcterms.date" content="2025-12-24">
+<meta name="dcterms.date" content="2025-12-25">
 
 <title>Stock Forecasting Engine: Technical Design</title>
 <style>
@@ -2210,7 +2210,10 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#open-resources" id="toc-open-resources" class="nav-link active" data-scroll-target="#open-resources"><span class="header-section-number">1</span> Open Resources</a></li>
+  <li><a href="#open-resources" id="toc-open-resources" class="nav-link active" data-scroll-target="#open-resources"><span class="header-section-number">1</span> Open Resources</a>
+  <ul class="collapse">
+  <li><a href="#libraries-used" id="toc-libraries-used" class="nav-link" data-scroll-target="#libraries-used"><span class="header-section-number">1.1</span> Libraries Used</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -2237,7 +2240,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 24, 2025</p>
+      <p class="date">December 25, 2025</p>
     </div>
   </div>
   
@@ -2249,14 +2252,48 @@ vertical-align: -.125em;
 </header>
 
 
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>TODO:</p>
+<ul class="task-list">
+<li><p><label><input type="checkbox">1. Need to create a py file for building the database</label></p></li>
+<li><p><label><input type="checkbox">2. Need to do EDA</label></p></li>
+</ul>
+</div>
+</div>
+</div>
 <section id="open-resources" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Open Resources</h1>
 <ul>
 <li><a href="https://openapi.twse.com.tw/#/">Taiwan Stock Market API Documentation</a></li>
 <li><a href="https://doc.finlab.tw/reference/finlab/">FinLab</a> We use finlab to get stock data and technical indicators from taiwan.</li>
 </ul>
+<section id="libraries-used" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="libraries-used"><span class="header-section-number">1.1</span> Libraries Used</h2>
+<ul>
+<li><strong>shiny</strong> for interactive website and dashboard.</li>
+<li><strong>plotly</strong> for interactive plots.</li>
+<li><strong>pandas</strong> for data manipulation and analysis.</li>
+<li><strong>numpy</strong> for numerical computing.</li>
+<li><strong>scikit-learn</strong> for machine learning models.</li>
+<li><strong>yfinance</strong> for fetching historical market data from Yahoo Finance.</li>
+<li><strong>matplotlib</strong> and <strong>seaborn</strong> for data visualization.</li>
+<li><strong>twstock</strong> for Taiwan stock market data.</li>
+<li><strong>sqlite3</strong> for database management.</li>
+</ul>
 <!-- -->
 
+</section>
 </section>
 
 </main>
@@ -2732,11 +2769,31 @@ vertical-align: -.125em;
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false               # Hides messy Python/R warnings</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu"># Open Resources</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Taiwan Stock Market API Documentation</span><span class="co">](https://openapi.twse.com.tw/#/)</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">FinLab</span><span class="co">](https://doc.finlab.tw/reference/finlab/)</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>We use finlab to get stock data and technical indicators from taiwan.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse=&quot;false&quot;}</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>TODO: </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> 1. Need to create a py file for building the database</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> 2. Need to do EDA</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="fu"># Open Resources</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Taiwan Stock Market API Documentation</span><span class="co">](https://openapi.twse.com.tw/#/)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">FinLab</span><span class="co">](https://doc.finlab.tw/reference/finlab/)</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>We use finlab to get stock data and technical indicators from taiwan.</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Libraries Used</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**shiny** for interactive website and dashboard.</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**plotly** for interactive plots.</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**pandas** for data manipulation and analysis.</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**numpy** for numerical computing.</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**scikit-learn** for machine learning models.</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**yfinance** for fetching historical market data from Yahoo Finance.</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**matplotlib** and **seaborn** for data visualization.</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**twstock** for Taiwan stock market data.</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**sqlite3** for database management.</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

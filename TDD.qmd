@@ -18,9 +18,29 @@ execute:
   warning: false               # Hides messy Python/R warnings
   message: false
 ---
+::: {.callout-note collapse="false"}
+TODO: 
+
+- [ ] 1. Need to create a py file for building the database
+
+- [ ] 2. Need to do EDA
+:::
 
 # Open Resources
 - [Taiwan Stock Market API Documentation](https://openapi.twse.com.tw/#/)
 - [FinLab](https://doc.finlab.tw/reference/finlab/)
 We use finlab to get stock data and technical indicators from taiwan.
+
+## Libraries Used
+- **shiny** for interactive website and dashboard.
+- **plotly** for interactive plots.
+- **pandas** for data manipulation and analysis.
+- **numpy** for numerical computing.
+- **scikit-learn** for machine learning models.
+- **yfinance** for fetching historical market data from Yahoo Finance.
+- **matplotlib** and **seaborn** for data visualization.
+- **twstock** for Taiwan stock market data.
+- **sqlite3** for database management.
+
+
 

@@ -7,3 +7,26 @@ format:
     theme: cosmo
     nav-buttons: [github]
 ---
+
+```{python}
+#| echo: false
+#| title: "Import Libraries"
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
+from shiny import reactive
+from shiny.express import input, render, ui
+import yfinance as yf
+```
+
+```{python}
+#| echo: true
+#| title: "Load Taiwan Stock Market Data"
+#| message: false
+#| warning: false
+
+# Load Taiwan stock market data from a CSV file
+data = yf.
