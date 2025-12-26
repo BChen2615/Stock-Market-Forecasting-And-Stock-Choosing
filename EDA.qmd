@@ -4,6 +4,7 @@ author: "Branden Chen"
 date: last-modified
 format: 
   dashboard:
+    orientation: rows
     theme: cosmo
     nav-buttons: [github]
 ---
@@ -11,22 +12,42 @@ format:
 ```{python}
 #| echo: false
 #| title: "Import Libraries"
+#| output: false
+#| message: false
+#| warning: false
 # Import necessary libraries
 import pandas as pd
 import numpy as np
+from yfinance.utils import auto_adjust
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-from shiny import reactive
-from shiny.express import input, render, ui
 import yfinance as yf
+import twstock
+import sqlite3
 ```
 
 ```{python}
-#| echo: true
+#| echo: false
 #| title: "Load Taiwan Stock Market Data"
 #| message: false
 #| warning: false
 
-# Load Taiwan stock market data from a CSV file
-data = yf.
+# Load Taiwan stock market data from a database
+db_path = "data/twstock.db"
+conn = sqlite3.connect(db_path)
+query = "SELECT * FROM tw_stock_prices"
+original_data = pd.read_sql_query(query, conn)
+```
+
+## Row {height= 50%}
+```{python}
+#| echo: false
+#| title: "Interactive Data Table"
+# Render the original_data DataFrame as an interactive table
+EDA_data = original_data.copy()
+EDA_data = EDA_data.groupby("Stock_ID").filter(lambda x: len(x) < 300)
+EDA_data = EDA_data.groupby("Stock_ID")["Close"].max()
+px.histogram(EDA_data, x="Close")
+
+```

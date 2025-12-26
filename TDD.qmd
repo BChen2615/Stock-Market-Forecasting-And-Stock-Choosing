@@ -21,9 +21,7 @@ execute:
 ::: {.callout-note collapse="false"}
 TODO: 
 
-- [ ] 1. Need to create a py file for building the database
-
-- [ ] 2. Need to do EDA
+- [ ] Need to do EDA
 :::
 
 # Open Resources
