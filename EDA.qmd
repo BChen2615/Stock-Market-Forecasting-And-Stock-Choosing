@@ -3,10 +3,12 @@ title: "Taiwan Stock Market Exploratory Data Analysis"
 author: "Branden Chen"
 date: last-modified
 format: 
-  dashboard:
+  html:
     orientation: rows
     theme: cosmo
     nav-buttons: [github]
+    toc: true
+    toc-location: left
 ---
 
 ```{python}
@@ -16,6 +18,7 @@ format:
 #| message: false
 #| warning: false
 # Import necessary libraries
+from datetime import date
 import pandas as pd
 import numpy as np
 from yfinance.utils import auto_adjust
@@ -38,16 +41,33 @@ db_path = "data/twstock.db"
 conn = sqlite3.connect(db_path)
 query = "SELECT * FROM tw_stock_prices"
 original_data = pd.read_sql_query(query, conn)
+original_data["Date"] = pd.to_datetime(original_data["Date"])
+original_data["Stock_ID"] = original_data["Stock_ID"].astype(int)
 ```
 
-## Row {height= 50%}
+# Intro to Taiwan Stock Market Data
+
 ```{python}
 #| echo: false
 #| title: "Interactive Data Table"
 # Render the original_data DataFrame as an interactive table
-EDA_data = original_data.copy()
-EDA_data = EDA_data.groupby("Stock_ID").filter(lambda x: len(x) < 300)
-EDA_data = EDA_data.groupby("Stock_ID")["Close"].max()
-px.histogram(EDA_data, x="Close")
+from src import DataProcess
 
+def graph_for_data(stock_id, start_date= date(2020, 12, 24), end_date= date.today()):
+    filtered_data = EDA_data[
+        (EDA_data["Stock_ID"] == stock_id) &
+        (EDA_data["Date"] >= pd.to_datetime(start_date)) &
+        (EDA_data["Date"] <= pd.to_datetime(end_date))
+    ]
+    return filtered_data
+
+
+EDA_data = original_data.copy()
+for i in [5, 10, 20, 60, 120, 240]:
+  EDA_data = DataProcess.average_price(i, EDA_data)
+
+y_graph = ["Close", "MA_5", "MA_60", "MA_120", "MA_240"]  # The selection of columns to plot
+stock_id_graph = "2330"  # Stock ID for graphing
+
+px.line(graph_for_data(2330, start_date= date(2025, 9, 1)), x= "Date", y= y_graph, title= f"{stock_id_graph}.tw Closing Prices with Moving Averages in TWD", labels= {"value": "Closing Price"})
 ```
