@@ -45,7 +45,12 @@ def prediction_data_processing(df, pred_date):
             each column is the feature of the stock
     """
 
-    return_df = df.copy()
-    return_df = filter_for_date(return_df, pred_date - dt.timedelta(day= 365))
+    original_df = df.copy()
+    original_df = filter_for_date(original_df, start_date= pred_date - dt.timedelta(day= 365))
+    sid = original_df["Stock_ID"].unique()
+    return_df = pd.DataFrame()
+    # TODO: The delta between second last day and last day in the dataframe, IDEA is to use group
+
+    
 
 

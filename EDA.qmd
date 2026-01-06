@@ -72,4 +72,17 @@ y_graph = ["Close", "MA_5","MA_10", "MA_20", "MA_60", "MA_120", "MA_240"]  # The
 stock_id_graph = "2330"  # Stock ID for graphing
 
 px.line(graph_for_data(2399, duration= 365), x= "Date", y= y_graph, title= f"{stock_id_graph}.tw Closing Prices with Moving Averages in TWD", labels= {"value": "Closing Price"})
+
+```
+
+```{python}
+sid = EDA_data["Stock_ID"].unique()
+trans = EDA_data.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).head(2)
+trans = trans.sort_values(['Date'])
+trans = trans[["Date", "Stock_ID", "Close", "MA_5","MA_10", "MA_20", "MA_60", "MA_120", "MA_240"]]
+new_trans = trans.groupby('Stock_ID', as_index= False)[["Close", "MA_5","MA_10", "MA_20", "MA_60", "MA_120", "MA_240"]].transform("pct_change")
+trans = trans.join(new_trans, rsuffix= '_delta')
+trans = trans.dropna(subset= ["Close_delta"])
+return_df = pd.DataFrame()
+return_df["Stock_ID"] = sid
 ```
