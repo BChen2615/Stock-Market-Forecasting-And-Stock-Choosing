@@ -16,6 +16,12 @@ def average_price(interval, data):
     pd.DataFrame: A dataframe containing the average prices and the original data frame that input.
     """
     return_data = data.sort_values(by= ['Stock_ID', 'Date'])
+    if interval > return_data.groupby("Stock_ID").size().max():
+        a = return_data.groupby("Stock_ID").size().max()
+        return_data[f"MA_{interval}"] = return_data.groupby("Stock_ID")["Close"].transform(lambda x: x.rolling(a).mean())
+
+        return return_data
+
     return_data[f"MA_{interval}"] = return_data.groupby("Stock_ID")["Close"].transform(lambda x: x.rolling(interval).mean())
 
     return return_data
@@ -46,10 +52,34 @@ def prediction_data_processing(df, pred_date):
     """
 
     original_df = df.copy()
-    original_df = filter_for_date(original_df, start_date= pred_date - dt.timedelta(day= 365))
+    original_df = filter_for_date(original_df, start_date= pred_date - dt.timedelta(365),
+                                  end_date= pred_date - dt.timedelta(1))
+    for i in [5, 10, 20, 60, 120, 240]:
+        original_df = average_price(i, original_df)
+
     sid = original_df["Stock_ID"].unique()
     return_df = pd.DataFrame()
+    return_df["Stock_ID"] = sid
+    transition_df = original_df.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).head(2)
+    transition_df = transition_df.sort_values('Date')
+    new_transotion_df = transition_df.groupby('Stock_ID', as_index= False)[["Close", "MA_5", "MA_10", "MA_20",
+                                                                            "MA_60", "MA_120", "MA_240"]].transform("pct_change")
+    transition_df = transition_df.join(new_transotion_df, rsuffix= "_delta_pct")
+    transition_df = transition_df.dropna(subset= ["Close_delta_pct"])
+    return_df = return_df.merge(transition_df, on= "Stock_ID", how= "right")
+
+    transition_df = original_df.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).head(2)
+    transition_df = transition_df.sort_values('Date')
+    new_transotion_df = transition_df.groupby('Stock_ID', as_index= False)[["Volume"]].transform("diff")
+    transition_df = transition_df.join(new_transotion_df, rsuffix= "_delta")
+    transition_df = transition_df.dropna(subset= ["Volume_delta"])
+    transition_df = transition_df[["Stock_ID", "Volume_delta"]]
+    return_df = return_df.merge(transition_df, on= "Stock_ID", how= "right")
+
+    return return_df
+
     # TODO: The delta between second last day and last day in the dataframe, IDEA is to use group
+
 
     
 
