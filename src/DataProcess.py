@@ -52,29 +52,73 @@ def prediction_data_processing(df, pred_date):
     """
 
     original_df = df.copy()
+
+    #-- Filtering data to where the date in range of pred_date - 365 days to pred_date - 1 day --#
     original_df = filter_for_date(original_df, start_date= pred_date - dt.timedelta(365),
                                   end_date= pred_date - dt.timedelta(1))
     for i in [5, 10, 20, 60, 120, 240]:
         original_df = average_price(i, original_df)
+
+    #-- Calculating the features --#
+
+    #-- Calculating the percentage change between last day and second last day --#
+    # Name of this calculation will have _suffix of _delta_pct
 
     sid = original_df["Stock_ID"].unique()
     return_df = pd.DataFrame()
     return_df["Stock_ID"] = sid
     transition_df = original_df.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).head(2)
     transition_df = transition_df.sort_values('Date')
-    new_transotion_df = transition_df.groupby('Stock_ID', as_index= False)[["Close", "MA_5", "MA_10", "MA_20",
+    new_transition_df = transition_df.groupby('Stock_ID', as_index= False)[["Close", "MA_5", "MA_10", "MA_20",
                                                                             "MA_60", "MA_120", "MA_240"]].transform("pct_change")
-    transition_df = transition_df.join(new_transotion_df, rsuffix= "_delta_pct")
+    transition_df = transition_df.join(new_transition_df, rsuffix="_delta_pct")
     transition_df = transition_df.dropna(subset= ["Close_delta_pct"])
     return_df = return_df.merge(transition_df, on= "Stock_ID", how= "right")
 
+    #-- Calculating the percentage change between second last day and third last day --#
+    # Name of this calculation will have _suffix of _delta_pct_2
+
+    transition_df = original_df.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).nth[1:3]
+    transition_df = transition_df.sort_values('Date')
+    new_transition_df = transition_df.groupby('Stock_ID', as_index= False)[["Close", "MA_5", "MA_10", "MA_20",
+                                                                            "MA_60", "MA_120", "MA_240"]].transform("pct_change")
+    transition_df = transition_df.join(new_transition_df, rsuffix="_delta_pct_2")
+    transition_df = transition_df.dropna(subset= ["Close_delta_pct_2"])
+    transition_df = transition_df[["Stock_ID", "Close_delta_pct_2", "MA_5_delta_pct_2", "MA_10_delta_pct_2",
+                                    "MA_20_delta_pct_2", "MA_60_delta_pct_2", "MA_120_delta_pct_2", "MA_240_delta_pct_2"]]
+    return_df = return_df.merge(transition_df, on= "Stock_ID", how= "right")
+
+    #-- Calculating the volume change between last day and second last day --#
+
+    # The name of this calculation will have _suffix of _delta
+
+    # This will not show in the final df that return, since this is just the help data
+    # for calculating the acceleration
+
     transition_df = original_df.sort_values('Date', ascending= False).groupby('Stock_ID', as_index= False).head(2)
     transition_df = transition_df.sort_values('Date')
-    new_transotion_df = transition_df.groupby('Stock_ID', as_index= False)[["Volume"]].transform("diff")
-    transition_df = transition_df.join(new_transotion_df, rsuffix= "_delta")
+    new_transition_df = transition_df.groupby('Stock_ID', as_index= False)[["Volume"]].transform("diff")
+    transition_df = transition_df.join(new_transition_df, rsuffix="_delta")
     transition_df = transition_df.dropna(subset= ["Volume_delta"])
     transition_df = transition_df[["Stock_ID", "Volume_delta"]]
     return_df = return_df.merge(transition_df, on= "Stock_ID", how= "right")
+    
+    #-- Calculating the acceleration of MA's and Close --#
+    # The name of this calculation will have _suffix of _acc
+    
+    ma = ["MA_5", "MA_10", "MA_20", "MA_60", "MA_120", "MA_240", "Close"]
+
+    first_ma = ["MA_5_delta_pct", "MA_10_delta_pct", "MA_20_delta_pct",
+                 "MA_60_delta_pct", "MA_120_delta_pct", "MA_240_delta_pct", "Close_delta_pct"]
+
+    second_ma = ["MA_5_delta_pct_2", "MA_10_delta_pct_2", "MA_20_delta_pct_2",
+                 "MA_60_delta_pct_2", "MA_120_delta_pct_2", "MA_240_delta_pct_2", "Close_delta_pct_2"]
+
+    for i in range(5):
+        return_df[f"{ma[i]}_acc"] = return_df[first_ma[i]] - return_df[second_ma[i]]
+
+    return_df = return_df.drop(labels= second_ma, axis= 1)
+
 
     return return_df
 

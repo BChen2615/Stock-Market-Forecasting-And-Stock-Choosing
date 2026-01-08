@@ -40,5 +40,9 @@ We use finlab to get stock data and technical indicators from taiwan.
 - **twstock** for Taiwan stock market data.
 - **sqlite3** for database management.
 
+# Algorithm Design
+
+- MA index: which is the distance between MA and multiply by sum of 2 MA
+
 
 

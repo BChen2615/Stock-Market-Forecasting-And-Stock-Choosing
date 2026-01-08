@@ -69,7 +69,7 @@ for i in [5, 10, 20, 60, 120, 240]:
   EDA_data = DataProcess.average_price(i, EDA_data)
 
 y_graph = ["Close", "MA_5","MA_10", "MA_20", "MA_60", "MA_120", "MA_240"]  # The selection of columns to plot
-stock_id_graph = "2330"  # Stock ID for graphing
+stock_id_graph = "2838"  # Stock ID for graphing
 
 px.line(graph_for_data(2399, duration= 365), x= "Date", y= y_graph, title= f"{stock_id_graph}.tw Closing Prices with Moving Averages in TWD", labels= {"value": "Closing Price"})
 
