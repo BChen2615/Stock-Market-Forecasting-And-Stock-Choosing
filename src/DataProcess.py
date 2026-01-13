@@ -16,13 +16,13 @@ def average_price(interval, data):
     pd.DataFrame: A dataframe containing the average prices and the original data frame that input.
     """
     return_data = data.sort_values(by= ['Stock_ID', 'Date'])
-    if interval > return_data.groupby("Stock_ID").size().max():
-        a = return_data.groupby("Stock_ID").size().max()
-        return_data[f"MA_{interval}"] = return_data.groupby("Stock_ID")["Close"].transform(lambda x: x.rolling(a).mean())
-
-        return return_data
-
-    return_data[f"MA_{interval}"] = return_data.groupby("Stock_ID")["Close"].transform(lambda x: x.rolling(interval).mean())
+    
+    # Use min_periods=1 to always calculate an average using available data.
+    # This prevents NaNs when data length is close to the interval size, 
+    # ensuring downstream calculations like pct_change always have valid inputs.
+    return_data[f"MA_{interval}"] = return_data.groupby("Stock_ID")["Close"].transform(
+        lambda x: x.rolling(interval, min_periods=1).mean()
+    )
 
     return return_data
 
@@ -114,17 +114,23 @@ def prediction_data_processing(df, pred_date):
     second_ma = ["MA_5_delta_pct_2", "MA_10_delta_pct_2", "MA_20_delta_pct_2",
                  "MA_60_delta_pct_2", "MA_120_delta_pct_2", "MA_240_delta_pct_2", "Close_delta_pct_2"]
 
-    for i in range(5):
+    for i in range(7):
         return_df[f"{ma[i]}_acc"] = return_df[first_ma[i]] - return_df[second_ma[i]]
 
     return_df = return_df.drop(labels= second_ma, axis= 1)
+
+    return_df["MA_5 > MA_10"] = (return_df["MA_5"] > return_df["MA_10"]).astype(int)
+    return_df["MA_5 > MA_20"] = (return_df["MA_5"] > return_df["MA_20"]).astype(int)
+    return_df["MA_10 > MA_20"] = (return_df["MA_10"] > return_df["MA_20"]).astype(int)
+    return_df["Close > MA_120"] = (return_df["Close"] > return_df["MA_120"]).astype(int)
+
+    translated_df = original_df.groupby("Stock_ID", as_index= False)[["Stock_ID", "Close"]].max()
+    translated_df.columns = ["Stock_ID", "max_Close"]
+    return_df = return_df.merge(translated_df, on= "Stock_ID", how= "left")
+    return_df["delta_max"] = return_df["max_Close"] - return_df["Close"]
+    # return_df = return_df.drop(labels= ["max_Close"], axis= 1)
 
 
     return return_df
 
     # TODO: The delta between second last day and last day in the dataframe, IDEA is to use group
-
-
-    
-
-
