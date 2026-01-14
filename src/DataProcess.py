@@ -119,18 +119,79 @@ def prediction_data_processing(df, pred_date):
 
     return_df = return_df.drop(labels= second_ma, axis= 1)
 
+    #-- Check if the stock is Bullish Alignment （MA_5, MA_10, MA_20) --
+
     return_df["MA_5 > MA_10"] = (return_df["MA_5"] > return_df["MA_10"]).astype(int)
     return_df["MA_5 > MA_20"] = (return_df["MA_5"] > return_df["MA_20"]).astype(int)
     return_df["MA_10 > MA_20"] = (return_df["MA_10"] > return_df["MA_20"]).astype(int)
     return_df["Close > MA_120"] = (return_df["Close"] > return_df["MA_120"]).astype(int)
 
+    #-- Distance between current price and maximum price in 1 year --
+
     translated_df = original_df.groupby("Stock_ID", as_index= False)[["Stock_ID", "Close"]].max()
     translated_df.columns = ["Stock_ID", "max_Close"]
     return_df = return_df.merge(translated_df, on= "Stock_ID", how= "left")
-    return_df["delta_max"] = return_df["max_Close"] - return_df["Close"]
-    # return_df = return_df.drop(labels= ["max_Close"], axis= 1)
+    return_df["delta_max"] = (return_df["max_Close"] - return_df["Close"]) / return_df["max_Close"]
+    return_df = return_df.drop(labels= ["max_Close"], axis= 1)
 
+    #-- The spread of the MA --
+    # Will use 4 statistics;
+    # Std_Low_MA: This is the StdDev(MA_5, MA_10, MA_20) / Price
+    # Std_High_MA: This is the StdDev(MA_60, MA_120, MA_240) / Price
+    # Diff_Std: Std_Low_MA - Std_High_MA
+    # Diff_MA: Mean(MA_5, MA_10, MA_20) / Price - Mean(MA_60, MA_120, MA_240) / Price
+    Low_MA = ["MA_5", "MA_10", "MA_20"]
+    High_MA = ["MA_60", "MA_120", "MA_240"]
+    return_df["Std_Low_MA"] = return_df[Low_MA].std(axis= 1) / return_df["Close"]
+    return_df["Std_High_MA"] = return_df[High_MA].std(axis= 1) / return_df["Close"]
+    return_df["Diff_Std"] = return_df["Std_Low_MA"] - return_df["Std_High_MA"]
+    return_df['Diff_MA'] = (return_df[Low_MA].mean(axis= 1) / return_df["Close"] - return_df[High_MA].mean(axis= 1) / return_df["Close"])
 
+    #-- 20 days average Volume --
+    transition_df = original_df.sort_values(['Stock_ID', 'Date'], ascending= False)
+    transition_df = transition_df.groupby('Stock_ID', as_index= False).nth[1:]
+    transition_df["20_average_volume"] = transition_df.groupby("Stock_ID")["Volume"].transform(
+        lambda x: x.rolling(5, min_periods=1).mean()
+    )
+    transition_df = transition_df.groupby('Stock_ID', as_index= False).head(1)
+    return_df = return_df.merge(transition_df[["Stock_ID", "20_average_volume"]], on= "Stock_ID", how= "left")
+    return_df["Diff_Volume"] = return_df["Volume"] / return_df["20_average_volume"]
+
+    #-- Stochastic Position --
+    # This is using the formula: (closing - 20_min) / (20_max - 20_min)
+    transition_df = original_df.sort_values(['Stock_ID', 'Date'], ascending= False)
+    transition_df = transition_df.groupby('Stock_ID', as_index= False).nth[:20]
+    transition_df["20_max_Close"] = transition_df.groupby("Stock_ID")["Close"].transform(lambda x: x.max())
+    transition_df["20_min_Close"] = transition_df.groupby("Stock_ID")["Close"].transform(lambda x: x.min())
+    transition_df = transition_df.groupby('Stock_ID', as_index= False).head(1)
+    return_df = return_df.merge(transition_df[["Stock_ID", "20_max_Close", "20_min_Close"]], on= "Stock_ID", how= "left")
+    return_df["Stochastic_Position"] = (return_df["Close"] - return_df["20_min_Close"]) / (return_df["20_max_Close"] - return_df["20_min_Close"])
+    return_df = return_df.fillna(0)
+
+    #-- Bias Ratio --
+    return_df["Bias_Ratio"] = (return_df["Close"] - return_df["MA_20"]) / return_df["MA_20"]
+
+    # Until here there are 44 columns, there are list of columns
+    # ['Stock_ID', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Type',
+    #        'MA_5', 'MA_10', 'MA_20', 'MA_60', 'MA_120', 'MA_240',
+    #        'Close_delta_pct', 'MA_5_delta_pct', 'MA_10_delta_pct',
+    #        'MA_20_delta_pct', 'MA_60_delta_pct', 'MA_120_delta_pct',
+    #        'MA_240_delta_pct', 'Volume_delta', 'MA_5_acc', 'MA_10_acc',
+    #        'MA_20_acc', 'MA_60_acc', 'MA_120_acc', 'MA_240_acc', 'Close_acc',
+    #        'MA_5 > MA_10', 'MA_5 > MA_20', 'MA_10 > MA_20', 'Close > MA_120',
+    #        'delta_max', 'Std_Low_MA', 'Std_High_MA', 'Diff_Std', 'Diff_MA',
+    #        '20_average_volume', 'Diff_Volume', '20_max_Close', '20_min_Close',
+    #        'Stochastic_Position', 'Bias_Ratio']
+
+    feature_col = ['Stock_ID', 'Close', 'Volume', '20_average_volume', 'Diff_Volume', 'Close_delta_pct', 'MA_5_delta_pct',
+                   'MA_10_delta_pct', 'MA_20_delta_pct', 'MA_60_delta_pct', 'MA_120_delta_pct',
+                   'MA_240_delta_pct', 'Volume_delta', 'MA_5_acc', 'MA_10_acc',
+                   'MA_20_acc', 'MA_60_acc', 'MA_120_acc', 'MA_240_acc', 'Close_acc',
+                   'MA_5 > MA_10', 'MA_5 > MA_20', 'MA_10 > MA_20', 'Close > MA_120',
+                   'delta_max', 'Std_Low_MA', 'Std_High_MA', 'Diff_Std', 'Diff_MA',
+                   '20_average_volume', 'Diff_Volume', '20_max_Close', '20_min_Close',
+                   'Stochastic_Position', 'Bias_Ratio'
+                   ]
+    return_df = return_df[feature_col]
     return return_df
 
-    # TODO: The delta between second last day and last day in the dataframe, IDEA is to use group

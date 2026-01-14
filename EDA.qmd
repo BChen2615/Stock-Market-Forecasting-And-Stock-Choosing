@@ -95,12 +95,6 @@ x = EDA_data.groupby("Stock_ID").size().max()
 from src import DataProcess as DP
 
 final = DP.prediction_data_processing(original_data, dt.datetime(2025,12,1))
-sid = original_data["Stock_ID"].unique()
-```
-
-
-```{python}
-from finlab import data as fdata
-close = fdata.get('price:收盤價')
-
+col = final.columns
+print(col)
 ```
