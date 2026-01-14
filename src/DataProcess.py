@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 import datetime as dt
+from sklearn.linear_model import LinearRegression
+
 
 def average_price(interval, data):
     """
@@ -149,11 +151,9 @@ def prediction_data_processing(df, pred_date):
 
     #-- 20 days average Volume --
     transition_df = original_df.sort_values(['Stock_ID', 'Date'], ascending= False)
-    transition_df = transition_df.groupby('Stock_ID', as_index= False).nth[1:]
-    transition_df["20_average_volume"] = transition_df.groupby("Stock_ID")["Volume"].transform(
-        lambda x: x.rolling(5, min_periods=1).mean()
-    )
-    transition_df = transition_df.groupby('Stock_ID', as_index= False).head(1)
+    transition_df = transition_df.groupby('Stock_ID', as_index= False).nth[:20]
+    transition_df = transition_df.groupby("Stock_ID", as_index= False)["Volume"].mean()
+    transition_df = transition_df.rename(columns= {"Volume": "20_average_volume"})
     return_df = return_df.merge(transition_df[["Stock_ID", "20_average_volume"]], on= "Stock_ID", how= "left")
     return_df["Diff_Volume"] = return_df["Volume"] / return_df["20_average_volume"]
 
@@ -195,3 +195,15 @@ def prediction_data_processing(df, pred_date):
     return_df = return_df[feature_col]
     return return_df
 
+def train_model(df):
+    '''
+    This is the function to train the model based on the data
+
+    :param df: (pd.dataframe) The dataframe that comes from the prediction_data_processing function and actually named "y"
+    :return: The trained model
+    '''
+    X = df.drop(columns= ['Stock_ID', 'y'])
+    y = df['y']
+    model = LinearRegression()
+    model.fit(X, y)
+    return model

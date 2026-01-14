@@ -95,6 +95,75 @@ x = EDA_data.groupby("Stock_ID").size().max()
 from src import DataProcess as DP
 
 final = DP.prediction_data_processing(original_data, dt.datetime(2025,12,1))
-col = final.columns
-print(col)
+```
+
+```{python}
+# First model, predict close price directly
+import sklearn as sk
+final = DP.prediction_data_processing(original_data, dt.datetime(2025,12,1))
+y = original_data[original_data["Date"] == dt.datetime(2025,12,1)][["Stock_ID", "Close"]]
+y = y.rename(columns= {"Close": "y"})
+final = final.merge(y, on= "Stock_ID", how= "left")
+
+y = final["y"]
+X = final.drop(columns= ["Stock_ID", "y"])
+
+X_train, X_test, y_train, y_test = sk.model_selection.train_test_split(X, y, test_size=0.2, random_state=42
+)
+
+X_train = X_train.astype('float64')
+X_test = X_test.astype('float64')
+y_train = y_train.astype('float64')
+y_test = y_test.astype("float64")
+
+model = sk.linear_model.LinearRegression()
+model.fit(X= X_train, y= y_train)
+```
+
+```{python}
+X_test['predict'] = model.predict(X_test)
+X_test['actual'] = y_test
+```
+
+```{python}
+X_test['residual'] = X_test['actual'] - X_test['predict']
+X_test['percent_error'] = X_test['residual'] / X_test['actual']
+gdf = X_test[['Close', 'actual', 'predict', 'percent_error']]
+px.scatter(gdf, "Close", "percent_error")
+print(model.intercept_)
+print(model.coef_)
+```
+
+```{python}
+# Second model, predic delta 
+import sklearn as sk
+
+final = DP.prediction_data_processing(original_data, dt.datetime(2025,12,1))
+y = original_data[original_data["Date"] <= dt.datetime(2025,12,1)]
+y = y.sort_values("Date", ascending= False).groupby("Stock_ID", as_index= False)[["Stock_ID", "Close"]].head(1)
+y = y.rename(columns= {"Close": "y_Close"})
+final = final.merge(y, on= "Stock_ID", how= "left")
+final['actual'] = (final["y_Close"] - final['Close']) / final["Close"]
+
+X = final.drop(columns= ["actual"])
+y = final["actual"]
+
+X_train, X_test, y_train, y_test = sk.model_selection.train_test_split(X, y, test_size=0.2, random_state=42
+)
+
+X_train = X_train.astype('float64')
+X_test = X_test.astype('float64')
+y_train = y_train.astype('float64')
+y_test = y_test.astype("float64")
+
+model = sk.linear_model.LinearRegression()
+model.fit(X= X_train.drop(columns= ["Stock_ID", "Close", "y_Close"]), y= y_train)
+
+X_test['predict'] = model.predict(X_test.drop(columns= ["Stock_ID", "Close", "y_Close"]))
+X_test['actual'] = y_test
+X_test['Predict_Close'] = X_test["Close"] + X_test["Close"] * X_test["predict"]
+X_test['residual'] = X_test['actual'] - X_test['predict']
+
+gdf = X_test[['Close', 'residual', 'predict', 'actual']]
+px.scatter(gdf, "predict", "residual")
 ```
